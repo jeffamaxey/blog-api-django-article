@@ -27,18 +27,17 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST','GET'])
     def comments(self, request, pk):
         post = models.Post.objects.get(pk=pk)
+        self.serializer_class = CommentSerializer
         if request.method == 'GET':
-            self.serializer_class = CommentSerializer
             queryset = models.Comment.objects.filter(post=post);
             serializer = CommentSerializer(queryset,many=True, context={'request':request})
-            return Response(serializer.data)        
         else:
-            self.serializer_class = CommentSerializer
             queryset = models.Comment.objects.filter(post=post);
             serializer = CommentSerializer(data=request.data, context={'request':request})
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user,post=post)
-            return Response(serializer.data)
+
+        return Response(serializer.data)
     
     def remove_comment(self, request, pk, comment):
         comment = models.Comment.objects.get(pk=comment)
